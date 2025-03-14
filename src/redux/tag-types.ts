@@ -11,6 +11,10 @@ export enum tagTypes {
    review = 'review',
    payment = 'payment',
    career = 'career',
+   vcMessage = 'vcMessage',
+   news = 'news',
+   noc = 'noc',
+   support = 'support',
 }
 
 export const tagTypesList = [
@@ -26,4 +30,8 @@ export const tagTypesList = [
    tagTypes.review,
    tagTypes.payment,
    tagTypes.career,
+   tagTypes.vcMessage,
+   tagTypes.news,
+   tagTypes.noc,
+   tagTypes.support,
 ];

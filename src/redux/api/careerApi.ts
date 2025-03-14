@@ -4,16 +4,27 @@ import { tagTypes } from "../tag-types";
 
 const CAREER_URL = '/career';
 
-export const careerApi = baseApi.injectEndpoints({
+interface CareerData {
+  title: string;
+  date: string;
+  documentsUrl: string;
+}
+
+ const careerApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     // Create career
-    createCareer: build.mutation<ICareer, Partial<ICareer>>({
-      query: (data) => ({
-        url: `${CAREER_URL}/create-career`,
-        method: 'POST',
-        data
-      }),
-      invalidatesTags: [tagTypes.career]
+    createCareer: build.mutation({
+      query: (data) => {
+        console.log('Creating career with data:', data);
+        return {
+          url: '/career/create-career',
+          method: 'POST', 
+          contentType : 'application/json',
+          data:data,  // Don't stringify, send the data as an object
+          
+        };
+      },
+      invalidatesTags: [tagTypes.career],
     }),
 
     // Get all careers
@@ -35,13 +46,14 @@ export const careerApi = baseApi.injectEndpoints({
     }),
 
     // Update career
-    updateCareer: build.mutation<ICareer, { id: string; data: Partial<ICareer> }>({
+    updateCareer: build.mutation({
       query: ({ id, data }) => ({
-        url: `${CAREER_URL}/${id}`,
+        url: `/career/${id}`,
         method: 'PATCH',
-        data
+        contentType : 'application/json',
+        data,  // Don't stringify, send the data as an object
       }),
-      invalidatesTags: [tagTypes.career]
+      invalidatesTags: [tagTypes.career],
     }),
 
     // Delete career

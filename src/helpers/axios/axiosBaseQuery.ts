@@ -22,6 +22,7 @@ export const axiosBaseQuery =
   > =>
   async ({ url, method, data, params, headers, contentType }) => {
     try {
+      
       const result = await axiosInstance({
         url: baseUrl + url,
         method,
@@ -31,6 +32,7 @@ export const axiosBaseQuery =
           "Content-Type": contentType || "application/json",
         },
       });
+
       return result;
     } catch (axiosError) {
       const err = axiosError as AxiosError;
