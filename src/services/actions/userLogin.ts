@@ -22,7 +22,7 @@ export const userLogin = async (data: FieldValues) => {
 
    if (userInfo.data.accessToken) {
       setAccessToken(userInfo.data.accessToken, {
-         redirect: '/dashboard/admin',
+         redirect: '/dashboard',
          passwordChangeRequired,
       });
    }

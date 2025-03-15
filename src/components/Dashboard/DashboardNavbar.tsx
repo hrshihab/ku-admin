@@ -24,13 +24,13 @@ const DashboardNavbar = ({ onSidebarToggle }: DashboardNavbarProps) => {
                <MenuIcon />
             </IconButton>
             <Image
-               src={assets.svgs.logo}
+               src="/images/kulogo.png"
                width={40}
                height={40}
                alt="logo"
             />
             <Typography variant="h6" sx={{ ml: 1, flexGrow: 1 }}>
-               PH HealthCare
+              Khulna University
             </Typography>
             <Stack direction="row" spacing={2} alignItems="center">
                <IconButton color="inherit">

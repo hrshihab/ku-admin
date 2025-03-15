@@ -10,17 +10,18 @@ export interface INOC {
 export const nocApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     // Create NOC
-    createNOC: build.mutation<any, INOC>({
+    createNOC: build.mutation({
       query: (data) => ({
         url: '/noc/create-noc',
         method: 'POST',
+        contentType:"application/json",
         body: data,
       }),
       invalidatesTags: [tagTypes.noc],
     }),
 
     // Get All NOCs
-    getAllNOCs: build.query<any, void>({
+    getAllNOCs: build.query({
       query: () => ({
         url: '/noc',
         method: 'GET',
@@ -29,7 +30,7 @@ export const nocApi = baseApi.injectEndpoints({
     }),
 
     // Get Single NOC
-    getNOCById: build.query<any, string>({
+    getNOCById: build.query({
       query: (id) => ({
         url: `/noc/${id}`,
         method: 'GET',
@@ -38,7 +39,7 @@ export const nocApi = baseApi.injectEndpoints({
     }),
 
     // Update NOC
-    updateNOC: build.mutation<any, { id: string; data: Partial<INOC> }>({
+    updateNOC: build.mutation({
       query: ({ id, data }) => ({
         url: `/noc/${id}`,
         method: 'PATCH',
@@ -48,7 +49,7 @@ export const nocApi = baseApi.injectEndpoints({
     }),
 
     // Delete NOC (Soft Delete)
-    deleteNOC: build.mutation<any, string>({
+    deleteNOC: build.mutation({
       query: (id) => ({
         url: `/noc/${id}`,
         method: 'DELETE',

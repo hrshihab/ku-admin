@@ -22,6 +22,7 @@ const SideBar = () => {
         sx={{
           py: 1,
           mt: 1,
+          mb: 2
         }}
         direction="row"
         justifyContent="center"
@@ -30,7 +31,7 @@ const SideBar = () => {
         component={Link}
         href="/"
       >
-        <Image src={assets.svgs.logo} width={40} height={40} alt="logo" />
+        <Image src="/images/kulogo.png" width={40} height={40} alt="logo" />
         <Typography
           variant="h6"
           component="h1"

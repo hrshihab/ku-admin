@@ -25,38 +25,38 @@ interface Support {
 }
 
 // Mock data based on your console output
-const mockSupports = [
-  {
-    id: '1090bfd2-541a-43cf-9218-6b86c163bf14',
-    name: 'Smith',
-    designation: 'Associate Professor',
-    instituteOffice: 'Department of Computer Science',
-    email: 'john.smith@ku.ac.bd',
-    status: 'PENDING',
-    category: 'IT',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: '7296c3eb-26ea-4e85-ad74-ee5fd78cd60e',
-    name: 'Dr. John Smith',
-    designation: 'Associate Professor',
-    instituteOffice: 'Department of Computer Science',
-    email: 'john.smith@ku.ac.bd',
-    status: 'PENDING',
-    category: 'ELECTRICAL',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: '93799991e-2efc-4b12-b6bf-26ece4e45a66',
-    name: 'Dr. John Smith',
-    designation: 'Associate Professor',
-    instituteOffice: 'Department of Computer Science',
-    email: 'john.smith@ku.ac.bd',
-    status: 'PENDING',
-    category: 'IT',
-    createdAt: new Date().toISOString(),
-  }
-];
+// const mockSupports = [
+//   {
+//     id: '1090bfd2-541a-43cf-9218-6b86c163bf14',
+//     name: 'Smith',
+//     designation: 'Associate Professor',
+//     instituteOffice: 'Department of Computer Science',
+//     email: 'john.smith@ku.ac.bd',
+//     status: 'PENDING',
+//     category: 'IT',
+//     createdAt: new Date().toISOString(),
+//   },
+//   {
+//     id: '7296c3eb-26ea-4e85-ad74-ee5fd78cd60e',
+//     name: 'Dr. John Smith',
+//     designation: 'Associate Professor',
+//     instituteOffice: 'Department of Computer Science',
+//     email: 'john.smith@ku.ac.bd',
+//     status: 'PENDING',
+//     category: 'ELECTRICAL',
+//     createdAt: new Date().toISOString(),
+//   },
+//   {
+//     id: '93799991e-2efc-4b12-b6bf-26ece4e45a66',
+//     name: 'Dr. John Smith',
+//     designation: 'Associate Professor',
+//     instituteOffice: 'Department of Computer Science',
+//     email: 'john.smith@ku.ac.bd',
+//     status: 'PENDING',
+//     category: 'IT',
+//     createdAt: new Date().toISOString(),
+//   }
+// ];
 
 export default function SupportDashboard() {
   const [sortBy, setSortBy] = useState<string>('createdAt');
@@ -67,6 +67,8 @@ export default function SupportDashboard() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [selectedSupport, setSelectedSupport] = useState<Support | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const { data, isLoading } = useGetAllSupportsQuery({
     page: currentPage,
@@ -85,6 +87,16 @@ export default function SupportDashboard() {
   const handlePreview = (support: Support) => {
     setSelectedSupport(support);
     setIsPreviewModalOpen(true);
+  };
+
+  const handleEdit = (support: Support) => {
+    setSelectedSupport(support);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDelete = (support: Support) => {
+    setSelectedSupport(support);
+    setIsDeleteModalOpen(true);
   };
 
   const getStatusColor = (status: SupportStatus) => {
@@ -174,7 +186,7 @@ export default function SupportDashboard() {
                 </td>
               </tr>
             ) : (
-              supports.map((support) => (
+              supports.map((support: Support) => (
                 <tr key={support.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {support.name}
@@ -209,12 +221,28 @@ export default function SupportDashboard() {
                     {format(new Date(support.createdAt), 'MMM dd, yyyy')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button 
-                      onClick={() => handlePreview(support)}
-                      className="text-blue-600 hover:text-blue-900"
-                    >
-                      View Details
-                    </button>
+                    <div className="flex space-x-2">
+                      <button 
+                        onClick={() => handlePreview(support)}
+                        className="bg-blue-500  hover:bg-blue-600 text-white px-4 py-1 rounded-md text-sm"
+                      >
+                        Preview
+                      </button>
+                      <button 
+                        onClick={() => handleEdit(support)}
+                        disabled
+                        className="bg-green-500 opacity-50 text-white px-4 py-1 rounded-md text-sm"
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(support)}
+                        disabled
+                        className="bg-red-500 opacity-50 text-white px-4 py-1 rounded-md text-sm"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

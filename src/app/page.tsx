@@ -1,43 +1,19 @@
 'use client';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Box, Button, TextField, Paper, Typography, Container } from '@mui/material';
 
 export default function HomePage() {
   const router = useRouter();
 
+  useEffect(() => {
+    // Redirect to login page immediately when component mounts
+    router.replace('/login');
+  }, [router]);
+
+  // Optional: Return a minimal loading indicator
   return (
-    <Container maxWidth={false} disableGutters>
-      <Box
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          bgcolor: '#f5f5f5'
-        }}
-      >
-        <Paper
-          elevation={3}
-          sx={{
-            p: 4,
-            width: '100%',
-            maxWidth: 400,
-            borderRadius: 2
-          }}
-        >
-          <Typography variant="h4" textAlign="center" mb={4} fontWeight="bold">
-            PH Health Care
-          </Typography>
-          <Button
-            fullWidth
-            variant="contained"
-            onClick={() => router.push('/dashboard')}
-            sx={{ mt: 3 }}
-          >
-            Go to Dashboard
-          </Button>
-        </Paper>
-      </Box>
-    </Container>
+    <div className="h-screen w-screen flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
   );
 }

@@ -123,13 +123,13 @@ export default function VcMessagePage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-3">
+                    <div className="flex space-x-2">
                       <button
                         onClick={() => {
                           setSelectedMessage(message);
                           setIsEditModalOpen(true);
                         }}
-                        className="text-indigo-600 hover:text-indigo-900 transition-colors"
+                        className="bg-[#10b981] hover:bg-[#0ea271] text-white px-4 py-1.5 rounded-md text-sm font-medium"
                       >
                         Edit
                       </button>
@@ -138,7 +138,7 @@ export default function VcMessagePage() {
                           setSelectedMessage(message);
                           setIsDeleteModalOpen(true);
                         }}
-                        className="text-red-600 hover:text-red-900 transition-colors"
+                        className="bg-[#ef4444] hover:bg-[#dc2626] text-white px-4 py-1.5 rounded-md text-sm font-medium"
                       >
                         Delete
                       </button>
