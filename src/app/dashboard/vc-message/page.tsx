@@ -29,6 +29,7 @@ export default function VcMessagePage() {
   const handleDelete = async () => {
     try {
       if (selectedMessage?.id) {
+        console.log("selectedMessage", selectedMessage);
         await deleteVCMessage(selectedMessage.id).unwrap();
         setIsDeleteModalOpen(false);
         setSelectedMessage(null);
@@ -70,9 +71,7 @@ export default function VcMessagePage() {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                ID
-              </th>
+           
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Message
               </th>
@@ -91,9 +90,7 @@ export default function VcMessagePage() {
             {vcMessages.length > 0 ? (
               vcMessages.map((message: VCMessage) => (
                 <tr key={message.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{message.id}</div>
-                  </td>
+                  
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-900 max-w-md">
                       {message.message}

@@ -1,34 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'SUPER_ADMIN' | 'ADMIN';
-  profilePhoto?: string;
-  contactNumber: string;
-  status: 'ACTIVE' | 'BLOCKED' | 'DELETED';
-  createdAt: string;
-}
+import { useGetSingleUserQuery } from '@/redux/api/userApi'; // Import the mutation hook
+import { useRouter } from 'next/navigation'; // Add this import
+import { useUpdateMYProfileMutation } from '@/redux/api/myProfile';
 
 export default function UserPage() {
-  // Mock data - replace with actual API call
-  const [user, setUser] = useState<User>({
-    id: '1',
-    name: 'Super Admin',
-    email: 'superadmin@gmail.com',
-    role: 'ADMIN',
-    profilePhoto: '/images/avatar-placeholder.png',
-    contactNumber: '+880 1234 567890',
-    status: 'ACTIVE',
-    createdAt: '2023-01-15T10:30:00Z',
-  });
+  const { data: user, error, isLoading } = useGetSingleUserQuery(undefined);
+  const [updateMYProfile, { isLoading: isUpdating, isSuccess, isError }] = useUpdateMYProfileMutation(); // Use the mutation hook
+  const router = useRouter(); // Add this
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(user);
+
+  useEffect(() => {
+    if (user) {
+      setFormData(user);
+    }
+  }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -38,11 +28,17 @@ export default function UserPage() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically call an API to update the user
-    setUser(formData);
-    setIsEditing(false);
+    try {
+      await updateMYProfile(formData).unwrap(); // Call the mutation
+      setIsEditing(false);
+      // Optionally, show a success message
+      console.log('Profile updated successfully');
+    } catch (error) {
+      // Handle error
+      console.error('Failed to update profile', error);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -53,6 +49,13 @@ export default function UserPage() {
       day: 'numeric',
     });
   };
+
+  const handleChangePassword = () => {
+    router.push('/dashboard/change-password');
+  };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading user data</div>;
 
   return (
     <div className="p-6">
@@ -75,23 +78,23 @@ export default function UserPage() {
             <div className="flex flex-col items-center">
               <div className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-gray-200">
                 <Image
-                  src={user.profilePhoto || '/images/avatar-placeholder.png'}
-                  alt={user.name}
+                  src={formData?.profilePhoto || '/images/avatar-placeholder.png'}
+                  alt={user?.name}
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="mt-4 text-center">
-                <h2 className="text-xl font-semibold text-gray-900">{user.name}</h2>
-                <p className="text-sm text-gray-500">{user.role.replace('_', ' ')}</p>
+                <h2 className="text-xl font-semibold text-gray-900">{user?.name}</h2>
+                <p className="text-sm text-gray-500">{user?.role.replace('_', ' ')}</p>
                 <span className={`mt-2 inline-block px-2 py-1 text-xs rounded-full ${
-                  user.status === 'ACTIVE' 
+                  user?.status === 'ACTIVE' 
                     ? 'bg-green-100 text-green-800' 
-                    : user.status === 'BLOCKED' 
+                    : user?.status === 'BLOCKED' 
                     ? 'bg-yellow-100 text-yellow-800' 
                     : 'bg-red-100 text-red-800'
                 }`}>
-                  {user.status}
+                  {user?.status}
                 </span>
               </div>
             </div>
@@ -105,7 +108,7 @@ export default function UserPage() {
                     <input
                       type="text"
                       name="name"
-                      value={formData.name}
+                      value={formData?.name || ''}
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                     />
@@ -116,7 +119,7 @@ export default function UserPage() {
                     <input
                       type="email"
                       name="email"
-                      value={formData.email}
+                      value={formData?.email || ''}
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                       disabled
@@ -128,7 +131,18 @@ export default function UserPage() {
                     <input
                       type="text"
                       name="contactNumber"
-                      value={formData.contactNumber}
+                      value={formData?.contactNumber || ''}
+                      onChange={handleChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Profile Photo URL</label>
+                    <input
+                      type="text"
+                      name="profilePhoto"
+                      value={formData?.profilePhoto || ''}
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                     />
@@ -138,8 +152,9 @@ export default function UserPage() {
                     <button
                       type="submit"
                       className="bg-[#10b981] hover:bg-[#0ea271] text-white px-4 py-1.5 rounded-md text-sm font-medium"
+                      disabled={isUpdating} // Disable button while updating
                     >
-                      Save Changes
+                      {isUpdating ? 'Saving...' : 'Save Changes'}
                     </button>
                     <button
                       type="button"
@@ -160,19 +175,19 @@ export default function UserPage() {
                     <div className="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
                       <div>
                         <p className="text-sm font-medium text-gray-500">Full Name</p>
-                        <p className="mt-1 text-sm text-gray-900">{user.name}</p>
+                        <p className="mt-1 text-sm text-gray-900">{user?.name}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">Email</p>
-                        <p className="mt-1 text-sm text-gray-900">{user.email}</p>
+                        <p className="mt-1 text-sm text-gray-900">{user?.email}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">Contact Number</p>
-                        <p className="mt-1 text-sm text-gray-900">{user.contactNumber}</p>
+                        <p className="mt-1 text-sm text-gray-900">{user?.contactNumber}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">Member Since</p>
-                        <p className="mt-1 text-sm text-gray-900">{formatDate(user.createdAt)}</p>
+                        <p className="mt-1 text-sm text-gray-900">{formatDate(user?.createdAt)}</p>
                       </div>
                     </div>
                   </div>
@@ -181,6 +196,7 @@ export default function UserPage() {
                     <h3 className="text-lg font-medium text-gray-900">Account Security</h3>
                     <div className="mt-4">
                       <button
+                        onClick={handleChangePassword}
                         className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-medium"
                       >
                         Change Password

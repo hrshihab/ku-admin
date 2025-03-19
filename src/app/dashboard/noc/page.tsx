@@ -2,21 +2,28 @@
 
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { useGetAllNOCsQuery } from '@/redux/api/nocApi';
+import { useGetAllNOCsQuery, useCreateNOCMutation, useDeleteNOCMutation } from '@/redux/api/nocApi';
+import { toast } from 'sonner';
+import DeleteModal from './DeleteModal';
 
 // Define types based on your API
 type NOCType = 'NOC' | 'GO';
 
 interface NOC {
-  id: string;
+ id: string;
   title: string;
   type: NOCType;
   publishedDate: string;
   documentsUrl: string;
-  createdBy: string;
-  createdAt: string;
-  updatedAt: string;
-  isDeleted: boolean;
+
+}
+
+// Add NOC Form interface
+interface NOCFormData {
+  title: string;
+  type: NOCType;
+  publishedDate: string;
+  documentsUrl: string;
 }
 
 export default function NOCPage() {
@@ -28,12 +35,50 @@ export default function NOCPage() {
   const [dateFilter, setDateFilter] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
+  // Add NOC Form state
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedNOC, setSelectedNOC] = useState<NOC | null>(null);
+  const [formData, setFormData] = useState<NOCFormData>({
+    title: '',
+    type: 'NOC',
+    publishedDate: '',
+    documentsUrl: ''
+  });
+
+  const [createNOC] = useCreateNOCMutation();
+  const [deleteNOC] = useDeleteNOCMutation();
+
   // Format date helper function
   const formatDate = (dateString: string) => {
     try {
       return format(new Date(dateString), 'MMM dd, yyyy');
     } catch (error) {
       return 'Invalid date';
+    }
+  };
+
+  const handleAddSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await createNOC(formData).unwrap();
+      toast.success('NOC created successfully');
+      setIsAddModalOpen(false);
+      setFormData({ title: '', type: 'NOC', publishedDate: '', documentsUrl: '' });
+    } catch (error) {
+      toast.error('Failed to create NOC');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedNOC) return;
+    try {
+      await deleteNOC(selectedNOC.id).unwrap();
+      toast.success('NOC deleted successfully');
+      setIsDeleteModalOpen(false);
+      setSelectedNOC(null);
+    } catch (error) {
+      toast.error('Failed to delete NOC');
     }
   };
 
@@ -73,8 +118,8 @@ export default function NOCPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">NOC & GO Documents</h1>
         <button 
-          disabled
-          className="px-4 py-2 bg-blue-400 text-white rounded-md cursor-not-allowed opacity-60"
+          onClick={() => setIsAddModalOpen(true)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
         >
           Add New Document
         </button>
@@ -188,14 +233,11 @@ export default function NOCPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <button
-                        disabled
-                        className="bg-[#10b981] hover:bg-[#0ea271] text-white px-4 py-1.5 rounded-md text-sm font-medium opacity-60 cursor-not-allowed"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        disabled
-                        className="bg-[#ef4444] hover:bg-[#dc2626] text-white px-4 py-1.5 rounded-md text-sm font-medium opacity-60 cursor-not-allowed"
+                        onClick={() => {
+                          setSelectedNOC(noc);
+                          setIsDeleteModalOpen(true);
+                        }}
+                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm font-medium"
                       >
                         Delete
                       </button>
@@ -229,6 +271,109 @@ export default function NOCPage() {
           </button>
         </div>
       </div>
+
+      {/* Add NOC Modal */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Add New Document</h2>
+              <button onClick={() => setIsAddModalOpen(false)} className="text-gray-500 hover:text-gray-700">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <form onSubmit={handleAddSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Title</label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Type</label>
+                <select
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value as NOCType })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                >
+                  <option value="NOC">NOC</option>
+                  <option value="GO">GO</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Published Date</label>
+                <input
+                  type="date"
+                  value={formData.publishedDate}
+                  onChange={(e) => setFormData({ ...formData, publishedDate: e.target.value })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Document URL</label>
+                <input
+                  type="url"
+                  value={formData.documentsUrl}
+                  onChange={(e) => setFormData({ ...formData, documentsUrl: e.target.value })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  Add Document
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && selectedNOC && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h2 className="text-xl font-semibold mb-4">Confirm Delete</h2>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete &quot;{selectedNOC.title}&quot;? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setIsDeleteModalOpen(false);
+                  setSelectedNOC(null);
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

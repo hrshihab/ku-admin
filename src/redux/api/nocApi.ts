@@ -14,8 +14,8 @@ export const nocApi = baseApi.injectEndpoints({
       query: (data) => ({
         url: '/noc/create-noc',
         method: 'POST',
-        contentType:"application/json",
-        body: data,
+        contentType: 'application/json',
+         data,
       }),
       invalidatesTags: [tagTypes.noc],
     }),

@@ -4,8 +4,9 @@ import { axiosBaseQuery } from '@/helpers/axios/axiosBaseQuery';
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: axiosBaseQuery({
-    baseUrl: 'http://localhost:5000/api/v1',
+    baseUrl: 'https://ku-server-eta.vercel.app/api/v1',
+    //baseUrl: 'http://localhost:5000/api/v1',
   }),
-  tagTypes: ['Career'],
+  
   endpoints: () => ({}),
 }); 

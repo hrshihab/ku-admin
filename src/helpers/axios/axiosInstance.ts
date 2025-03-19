@@ -45,14 +45,18 @@ instance.interceptors.response.use(
       // console.log(error);
       const config = error.config;
       // console.log(config);
-      if (error?.response?.status === 500 && !config.sent) {
+      if (error?.response?.status === 401 && !config.sent) {
          config.sent = true;
-         const response = await getNewAccessToken();
-         const accessToken = response?.data?.accessToken;
-         config.headers['Authorization'] = accessToken;
-         setToLocalStorage(authKey, accessToken);
-         setAccessToken(accessToken);
-         return instance(config);
+         try {
+            const response = await getNewAccessToken();
+            const accessToken = response?.data?.accessToken;
+            config.headers['Authorization'] = accessToken;
+            setToLocalStorage(authKey, accessToken);
+            setAccessToken(accessToken);
+            return instance(config);
+         } catch (refreshError) {
+            console.log('Token refresh failed:', refreshError);
+         }
       } else {
          const responseObject: IGenericErrorResponse = {
             statusCode: error?.response?.data?.statusCode || 500,

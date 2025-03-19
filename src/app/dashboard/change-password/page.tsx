@@ -22,9 +22,9 @@ const ChangePassword = () => {
    const router = useRouter();
    const onSubmit = async (values: FieldValues) => {
       try {
-         const res = await changePassword(values);
-
-         if ('data' in res && res.data.status === 200) {
+         const res = await changePassword(values).unwrap();
+         console.log(res);
+         if (res.message === 'Password changed successfully!') {
             logoutUser(router);
             toast.success('Password Changed Successfully');
          } else {
@@ -34,6 +34,7 @@ const ChangePassword = () => {
          toast.success('Incorrect Old Password');
          console.log(error);
       }
+         
    };
 
    return (

@@ -8,7 +8,8 @@ import WorkIcon from '@mui/icons-material/Work';  // For Career
 import AnnouncementIcon from '@mui/icons-material/Announcement';  // For News
 import HelpIcon from '@mui/icons-material/Help';  // For Support
 import BusinessIcon from '@mui/icons-material/Business';  // For NOC
-
+import NewspaperIcon from '@mui/icons-material/Newspaper';  // For News
+import MessageIcon from '@mui/icons-material/Message';  // For VC Message
 export const drawerItems = (): DrawerItem[] => {
    const roleMenus: DrawerItem[] = [];
 
@@ -22,12 +23,7 @@ export const drawerItems = (): DrawerItem[] => {
       {
          title: 'News',
          path: '/news',
-         icon: AnnouncementIcon,
-      },
-      {
-         title: 'Support',
-         path: '/support',
-         icon: HelpIcon,
+         icon: NewspaperIcon,
       },
       {
          title: 'NOC',
@@ -37,8 +33,19 @@ export const drawerItems = (): DrawerItem[] => {
       {
          title: 'VC Message',
          path: '/vc-message',
-         icon: PersonIcon,
-      }, {
+         icon: MessageIcon,
+      },
+      {
+         title: 'Support',
+         path: '/support',
+         icon: HelpIcon,
+      },
+      {
+         title:'Users',
+         path:'/users',
+         icon:PersonIcon
+      },
+      {
          title: 'Change Password',
          path: '/change-password',
          icon: KeyIcon,

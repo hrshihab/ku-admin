@@ -41,19 +41,17 @@ const EditVCMessageModal = ({ isOpen, onClose, vcMessage }: EditVCMessageModalPr
     }
 
     try {
-      const data = {
-        message: formData.message.trim(),
-        imageUrl: formData.imageUrl.trim() || 'https://www.web.com'
-      };
+   
 
-      console.log("Update data:", data);
+     
 
       const response = await updateVCMessage({
         id: vcMessage?.id as string,
-        data: data
+        message: formData.message.trim(),
+        imageUrl: formData.imageUrl.trim() 
       }).unwrap();
       
-      console.log('Response:', response);
+      //console.log('Response:', response);
       onClose();
       setFormData({ message: '', imageUrl: '' });
     } catch (err: any) {

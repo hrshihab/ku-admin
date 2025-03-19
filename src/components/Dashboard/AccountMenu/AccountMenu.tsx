@@ -55,6 +55,10 @@ export default function AccountMenu() {
       logoutUser(router);
    };
 
+   const handleProfileClick = () => {
+      router.push('/dashboard/profile');
+   };
+
    return (
       <React.Fragment>
          <Box
@@ -100,7 +104,7 @@ export default function AccountMenu() {
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
          >
-            <MenuItem onClick={handleClose}>
+            <MenuItem onClick={() => { handleClose(); handleProfileClick(); }}>
                <Avatar
                   sx={{ background: 'transparent', color: 'primary.main' }}
                />

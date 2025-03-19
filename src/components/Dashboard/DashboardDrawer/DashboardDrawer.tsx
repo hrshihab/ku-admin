@@ -14,6 +14,8 @@ import { Avatar, Badge, Stack } from "@mui/material";
 import AccountMenu from "../AccountMenu/AccountMenu";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import { useGetSingleUserQuery } from "@/redux/api/userApi";
+import { useRouter } from 'next/navigation';
+import Tooltip from '@mui/material/Tooltip';
 
 const drawerWidth = 240;
 
@@ -41,6 +43,11 @@ export default function DashboardDrawer({
   };
 
   const { data, isLoading } = useGetSingleUserQuery({});
+  const router = useRouter();
+
+  const handleAvatarClick = () => {
+    router.push('/dashboard/profile');
+  };
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -98,7 +105,17 @@ export default function DashboardDrawer({
                   <NotificationsNoneIcon color="action" />
                 </IconButton>
               </Badge>
-              <Avatar alt={data?.name} src={data?.profilePhoto} />
+              <Tooltip title="View Profile">
+                <div 
+                  onClick={handleAvatarClick}
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                >
+                  <Avatar 
+                    alt={data?.name} 
+                    src={data?.profilePhoto}
+                  />
+                </div>
+              </Tooltip>
               <AccountMenu />
             </Stack>
           </Box>

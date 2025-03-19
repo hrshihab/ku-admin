@@ -6,11 +6,9 @@ export const vcMessageApi = baseApi.injectEndpoints({
     // Create VC Message 
     createVCMessage: build.mutation({
       query: (data) => ({
-        url: '/vc-message/create-vc-message',
+        url: '/vc-message',
         method: 'POST',
-        contentType : 'application/json',
-        data,  // Don't stringify, send the data as an object
-        
+        body: data,
       }),
       invalidatesTags: [tagTypes.vcMessage],
     }),
@@ -26,11 +24,15 @@ export const vcMessageApi = baseApi.injectEndpoints({
 
     // Update VC Message
     updateVCMessage: build.mutation({
-      query: ({ id, ...body }) => ({
-        url: `/vc-message/update-vc-message/${id}`,
-        method: 'PUT',
-        body,
-      }),
+      query: ({ id, ...body }) => {
+        //console.log(body);
+        return {
+          url: `/vc-message/update-vc-message/${id}`,
+          method: 'PUT',
+          contentType: 'application/json',
+          data: body,
+        }
+      },
       invalidatesTags: [tagTypes.vcMessage],
     }),
 
@@ -43,6 +45,7 @@ export const vcMessageApi = baseApi.injectEndpoints({
       invalidatesTags: [tagTypes.vcMessage],
     }),
   }),
+  overrideExisting: true
 });
 
 export const {

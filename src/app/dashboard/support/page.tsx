@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { useGetAllSupportsQuery } from '@/redux/api/supportApi';
-
+import { useGetAllSupportsQuery, useUpdateSupportStatusMutation } from '@/redux/api/supportApi';
+import { toast } from 'sonner';
+// Removed the import for 'react-toastify' since it cannot be found
+// Type definitions remain unchanged
 type SupportStatus = 'PENDING' | 'IN_PROGRESS' | 'RESOLVED' | 'REJECTED';
 type SupportCategory = 'IT' | 'ELECTRICAL' | 'PLUMBING' | 'CARPENTRY' | 'CLEANING' | 'SECURITY' | 'OTHER';
 
-interface Support {
+export interface Support {
   id: string;
   name: string;
   designation: string;
@@ -24,79 +26,27 @@ interface Support {
   updatedAt: string;
 }
 
-// Mock data based on your console output
-// const mockSupports = [
-//   {
-//     id: '1090bfd2-541a-43cf-9218-6b86c163bf14',
-//     name: 'Smith',
-//     designation: 'Associate Professor',
-//     instituteOffice: 'Department of Computer Science',
-//     email: 'john.smith@ku.ac.bd',
-//     status: 'PENDING',
-//     category: 'IT',
-//     createdAt: new Date().toISOString(),
-//   },
-//   {
-//     id: '7296c3eb-26ea-4e85-ad74-ee5fd78cd60e',
-//     name: 'Dr. John Smith',
-//     designation: 'Associate Professor',
-//     instituteOffice: 'Department of Computer Science',
-//     email: 'john.smith@ku.ac.bd',
-//     status: 'PENDING',
-//     category: 'ELECTRICAL',
-//     createdAt: new Date().toISOString(),
-//   },
-//   {
-//     id: '93799991e-2efc-4b12-b6bf-26ece4e45a66',
-//     name: 'Dr. John Smith',
-//     designation: 'Associate Professor',
-//     instituteOffice: 'Department of Computer Science',
-//     email: 'john.smith@ku.ac.bd',
-//     status: 'PENDING',
-//     category: 'IT',
-//     createdAt: new Date().toISOString(),
-//   }
-// ];
+
 
 export default function SupportDashboard() {
-  const [sortBy, setSortBy] = useState<string>('createdAt');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [selectedStatus, setSelectedStatus] = useState<string>('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [selectedSupport, setSelectedSupport] = useState<Support | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [updateStatus] = useUpdateSupportStatusMutation();
 
-  const { data, isLoading } = useGetAllSupportsQuery({
-    page: currentPage,
-    limit: itemsPerPage,
-    sortBy,
-    sortOrder,
-    status: selectedStatus,
-    category: selectedCategory,
-  });
-
-  console.log("data",data)
-
-  const supports = data || [];
-  const totalItems = data?.meta?.total || 0;
+  const { data: supports, isLoading } = useGetAllSupportsQuery({});
 
   const handlePreview = (support: Support) => {
     setSelectedSupport(support);
     setIsPreviewModalOpen(true);
   };
 
-  const handleEdit = (support: Support) => {
-    setSelectedSupport(support);
-    setIsEditModalOpen(true);
-  };
-
-  const handleDelete = (support: Support) => {
-    setSelectedSupport(support);
-    setIsDeleteModalOpen(true);
+  const handleStatusUpdate = async (id: string, newStatus: SupportStatus) => {
+    try {
+      await updateStatus({ id, status: newStatus }).unwrap();
+      toast.success('Status updated successfully');
+    } catch (error) {
+      toast.error('Failed to update status');
+    }
   };
 
   const getStatusColor = (status: SupportStatus) => {
@@ -122,45 +72,6 @@ export default function SupportDashboard() {
     <div className="p-6 bg-white rounded-xl shadow-sm">
       <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-lg font-semibold text-gray-800">Support Tickets</h3>
-
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Category Filter */}
-          <select 
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            <option value="">All Categories</option>
-            <option value="IT">IT</option>
-            <option value="ELECTRICAL">Electrical</option>
-            <option value="PLUMBING">Plumbing</option>
-            <option value="CARPENTRY">Carpentry</option>
-            <option value="CLEANING">Cleaning</option>
-            <option value="SECURITY">Security</option>
-            <option value="OTHER">Other</option>
-          </select>
-
-          {/* Status Filter */}
-          <select 
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm"
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-          >
-            <option value="">All Status</option>
-            <option value="PENDING">Pending</option>
-            <option value="IN_PROGRESS">In Progress</option>
-            <option value="RESOLVED">Resolved</option>
-            <option value="REJECTED">Rejected</option>
-          </select>
-
-          {/* Sort Order */}
-          <button
-            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm"
-          >
-            {sortOrder === 'asc' ? '↑' : '↓'}
-          </button>
-        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -179,101 +90,67 @@ export default function SupportDashboard() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {supports.length === 0 ? (
-              <tr>
-                <td colSpan={9} className="px-6 py-4 text-center text-gray-500">
-                  No support tickets found
+            {supports?.map((support: Support) => (
+              <tr key={support.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {support.name}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {support.designation}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {support.instituteOffice}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div>
+                    <p>{support.email}</p>
+                    <p>{support.mobileNumber || 'N/A'}</p>
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div>
+                    <p>{support.buildingName || 'N/A'}</p>
+                    <p>Room: {support.roomNumber || 'N/A'}</p>
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {support.category}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(support.status)}`}>
+                    {support.status}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {format(new Date(support.createdAt), 'MMM dd, yyyy')}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={() => handlePreview(support)}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-xs"
+                    >
+                      View
+                    </button>
+                    
+                    <select
+                      value={support.status}
+                      onChange={(e) => handleStatusUpdate(support.id, e.target.value as SupportStatus)}
+                      className="text-xs rounded-md px-2 py-1 border border-gray-300 bg-white hover:bg-gray-50"
+                    >
+                      <option value="" disabled>Change Status</option>
+                      <option value="PENDING">Pending</option>
+                      <option value="IN_PROGRESS">In Progress</option>
+                      <option value="RESOLVED">Resolved</option>
+                      <option value="REJECTED">Rejected</option>
+                    </select>
+                  </div>
                 </td>
               </tr>
-            ) : (
-              supports.map((support: Support) => (
-                <tr key={support.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {support.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {support.designation}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {support.instituteOffice}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div>
-                      <p>{support.email}</p>
-                      <p>{support.mobileNumber || 'N/A'}</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div>
-                      <p>{support.buildingName || 'N/A'}</p>
-                      <p>Room: {support.roomNumber || 'N/A'}</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {support.category}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(support.status)}`}>
-                      {support.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {format(new Date(support.createdAt), 'MMM dd, yyyy')}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button 
-                        onClick={() => handlePreview(support)}
-                        className="bg-blue-500  hover:bg-blue-600 text-white px-4 py-1 rounded-md text-sm"
-                      >
-                        Preview
-                      </button>
-                      <button 
-                        onClick={() => handleEdit(support)}
-                        disabled
-                        className="bg-green-500 opacity-50 text-white px-4 py-1 rounded-md text-sm"
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(support)}
-                        disabled
-                        className="bg-red-500 opacity-50 text-white px-4 py-1 rounded-md text-sm"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
+            ))}
           </tbody>
         </table>
       </div>
-
-      {supports.length > 0 && (
-        <div className="mt-4 flex items-center justify-between">
-          <div className="text-sm text-gray-500">
-            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} entries
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <button
-              onClick={() => setCurrentPage(prev => prev + 1)}
-              disabled={currentPage * itemsPerPage >= totalItems}
-              className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Preview Modal */}
       {isPreviewModalOpen && selectedSupport && (

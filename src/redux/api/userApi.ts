@@ -10,6 +10,7 @@ export const userApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.user],
     }),
+    
   }),
 });
 

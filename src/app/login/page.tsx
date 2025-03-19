@@ -78,7 +78,7 @@ const LoginPage = () => {
                >
                   <Box sx={{ mb: 2 }}>
                      <Image
-                        src={assets.svgs.logo}
+                        src={'/images/kulogo.png'}
                         width={50}
                         height={50}
                         alt='logo'

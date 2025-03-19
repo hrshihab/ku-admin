@@ -41,12 +41,15 @@ export const supportApi = baseApi.injectEndpoints({
 
     // Update Support
     updateSupport: build.mutation({
-      query: ({ id, data }) => ({
-        url: `/support/${id}`,
-        method: 'PATCH',
-        contentType: 'application/json',
-        data,
-      }),
+      query: ({ id, data }) => {
+        console.log("update support", data);
+        return {
+          url: `/support/${id}`,
+          method: 'PATCH',
+          contentType: 'application/json',
+          data,
+        };
+      },
       invalidatesTags: [tagTypes.support],
     }),
 
@@ -55,6 +58,17 @@ export const supportApi = baseApi.injectEndpoints({
       query: (id) => ({
         url: `/support/${id}`,
         method: 'DELETE',
+      }),
+      invalidatesTags: [tagTypes.support],
+    }),
+
+    // Update Support Status
+    updateSupportStatus: build.mutation({
+      query: ({ id, status }) => ({
+        url: `/support/${id}`,
+        method: 'PATCH',
+        contentType: 'application/json',
+        data: { status }
       }),
       invalidatesTags: [tagTypes.support],
     }),
@@ -67,4 +81,5 @@ export const {
   useGetSupportByIdQuery,
   useUpdateSupportMutation,
   useDeleteSupportMutation,
+  useUpdateSupportStatusMutation,
 } = supportApi; 

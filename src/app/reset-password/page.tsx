@@ -7,9 +7,8 @@ import { z } from 'zod';
 import KeyIcon from '@mui/icons-material/Key';
 import PHInput from '@/components/Forms/PHInput';
 import PHForm from '@/components/Forms/PHForm';
-import { useSearchParams } from 'next/navigation';
-import { authApi, useResetPasswordMutation } from '@/redux/api/authApi';
-import { useEffect } from 'react';
+import { useResetPasswordMutation } from '@/redux/api/authApi';
+import { useEffect, useState } from 'react';
 import { authKey } from '@/contants/authkey';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -18,39 +17,45 @@ import { deleteCookies } from '@/services/actions/deleteCookies';
 const validationSchema = z.object({
    newPassword: z.string().min(6, 'Must be at least 6 characters long'),
 });
-const ResetPassword = () => {
-   const searchParams = useSearchParams();
-   const id = searchParams.get('id');
-   const token = searchParams.get('token');
-   console.log({ id, token });
-   const router = useRouter();
 
+const ResetPassword = () => {
+   const router = useRouter();
    const [resetPassword] = useResetPasswordMutation();
+   const [id, setId] = useState<string | null>(null);
+   const [token, setToken] = useState<string | null>(null);
 
    useEffect(() => {
-      if (!token) return;
-      localStorage.setItem(authKey, token);
+      if (typeof window !== 'undefined') {
+         const urlParams = new URLSearchParams(window.location.search);
+         setId(urlParams.get('userId'));
+         setToken(urlParams.get('token'));
+      }
+   }, []);
+
+   useEffect(() => {
+      if (token) {
+         localStorage.setItem(authKey, token);
+      }
    }, [token]);
 
    const onSubmit = async (values: FieldValues) => {
-      console.log(values);
       const updatedData = { ...values, id };
 
       try {
-         const res = await resetPassword(updatedData);
-
-         if ('data' in res && res.data.status === 200) {
+         const res = await resetPassword(updatedData).unwrap();
+         if (res.message === "Password reset successfully!") {
             toast.success('Password Reset Successful');
             localStorage.removeItem(authKey);
             deleteCookies([authKey, 'refreshToken']);
             router.push('/login');
          } else {
-            throw new Error('Something Went Wrong, Try Again');
+            throw new Error('Unexpected response');
          }
       } catch (error) {
-         toast.success('Something Went Wrong, Try Again');
+         toast.error('Something Went Wrong, Try Again');
       }
    };
+
    return (
       <Box
          sx={{

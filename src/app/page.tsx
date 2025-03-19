@@ -1,14 +1,21 @@
 'use client';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import useUserInfo from '@/hooks/useUserInfo';
 
 export default function HomePage() {
   const router = useRouter();
+  const userInfo = useUserInfo();
 
   useEffect(() => {
-    // Redirect to login page immediately when component mounts
-    router.replace('/login');
-  }, [router]);
+    if (userInfo) {
+      // Redirect to dashboard if the user is already logged in
+      router.replace('/dashboard');
+    } else {
+      // Redirect to login page if the user is not logged in
+      router.replace('/login');
+    }
+  }, [userInfo, router]);
 
   // Optional: Return a minimal loading indicator
   return (
