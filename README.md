@@ -1,10 +1,15 @@
-Here is the **README** for your **Admin Panel (Khulna University Portal)** project that you can directly copy and paste:
-
----
 
 # Khulna University Portal - Admin Panel
 
 This is the **Admin Panel** for the **Khulna University Portal** built using **Next.js**, **React**, and **Material-UI**. This project provides an interface for administrators to manage users, news, support requests, careers, NOC/GO documents, and more.
+
+## Live Demo
+
+You can access the live demo of the **Admin Panel** here:  
+[**Khulna University Admin Panel**](https://ku-admin.vercel.app/)
+
+![Admin Panel Preview](https://i.ibb.co.com/DH3JCtPY/image.png)  
+*Admin Panel Screenshot*
 
 ## Features
 
@@ -95,4 +100,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-You can copy and paste this **README** into the **GitHub repository** for your **Admin Panel (Khulna University Portal)** project. Let me know if you need any modifications or additional information!
